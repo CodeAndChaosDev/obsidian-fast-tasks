@@ -62,7 +62,7 @@ Tasks are saved as Obsidian markdown checkboxes:
 
 ## 🧪 Status
 
-**V0.1-alpha** — Actively under development. Expect bugs and edge cases. Feedback welcome!
+**V0.2-alpha** — Actively under development. Expect bugs and edge cases. Feedback welcome!
 
 ---
 
