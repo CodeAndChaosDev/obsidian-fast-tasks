@@ -1,4 +1,4 @@
-import { App, ButtonComponent, TextComponent, TFile, Modal, Notice } from 'obsidian';
+import { App, ButtonComponent, TextComponent, TFile, Modal, Notice, MarkdownView } from 'obsidian';
 import { TaskData } from './types';
 
 export class TaskManager {
@@ -50,22 +50,28 @@ export class TaskManager {
   if (!context) return;
 
   const { tasks, lines, file } = context;
+  const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+  if (!editor) return;
 
-  // Find selected task: for now, move the first task as example
-  const index = tasks[0]?.lineNumber;
-  if (index === undefined) return;
+  const cursorLine = editor.getCursor().line;
+  const currentTask = tasks.find(t => t.lineNumber === cursorLine);
+  if (!currentTask || currentTask.lineNumber === undefined) return;
 
-  const newIndex = index + direction;
-  if (newIndex < 0 || newIndex >= lines.length) return;
+  const currentIndex = currentTask.lineNumber;
+  const targetIndex = currentIndex + direction;
+
+  if (targetIndex < 0 || targetIndex >= lines.length) return;
 
   // Swap lines
-  const temp = lines[index];
-  lines[index] = lines[newIndex];
-  lines[newIndex] = temp;
+  const temp = lines[currentIndex];
+  lines[currentIndex] = lines[targetIndex];
+  lines[targetIndex] = temp;
 
   await this.app.vault.modify(file, lines.join('\n'));
-}
 
+  // Update cursor to follow the moved task
+  editor.setCursor({ line: targetIndex, ch: 0 });
+}
 
    async rescheduleTask() {
     const file = this.app.workspace.getActiveFile();
@@ -96,17 +102,27 @@ async togglePriority() {
   if (!context) return;
 
   const { tasks, lines, file } = context;
-  const task = tasks[0]; // again, simple logic
+
+  // Get the editor and current cursor line
+  const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+  if (!editor) return;
+
+  const cursorLine = editor.getCursor().line;
+
+  // Find the task on the current line
+  const task = tasks.find(t => t.lineNumber === cursorLine);
+  if (!task) return;
 
   const nextPriority: TaskData['priority'] =
     task.priority === '🔥 High' ? '⚠ Medium' :
     task.priority === '⚠ Medium' ? '💤 Low' : '🔥 High';
 
-  const line = lines[task.lineNumber!];
-  lines[task.lineNumber!] = line.replace(/(🔥 High|⚠ Medium|💤 Low)/, nextPriority);
+  const line = lines[cursorLine];
+  lines[cursorLine] = line.replace(/(🔥 High|⚠ Medium|💤 Low)/, nextPriority);
 
   await this.app.vault.modify(file, lines.join('\n'));
 }
+
 }
 
 
