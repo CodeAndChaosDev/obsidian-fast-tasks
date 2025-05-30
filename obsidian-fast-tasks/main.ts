@@ -4,15 +4,25 @@ import { TaskManager } from './TaskManager';
 import { SidebarView } from './SidebarView';
 
 export default class TaskPlugin extends Plugin {
-  async onload() {
-    const manager = new TaskManager(this.app);
+  private manager: TaskManager;
 
-    // 🧠 Modal Trigger
+  async onload() {
+    this.manager = new TaskManager(this.app);
+
+    // ✅ Register Sidebar View
+    this.registerView('taskmaster-sidebar', (leaf) => new SidebarView(leaf, this.manager));
+
+    // ✅ Ribbon Icon to open Sidebar
+    this.addRibbonIcon('check-circle', 'Open Task Sidebar', () => {
+      this.activateView();
+    });
+
+    // ✅ Modal: Create New Task
     this.addCommand({
       id: 'open-task-modal',
       name: 'Create New Task',
-      callback: () => new TaskModal(this.app, task => manager.insertTask(task)).open(),
-      hotkeys: [{ modifiers: ['Mod'], key: 'T' }],
+      hotkeys: [{ modifiers: ['Mod'], key: 'q' }], // Ctrl+Q or Cmd+Q
+      callback: () => new TaskModal(this.app, task => this.manager.insertTask(task)).open(),
     });
 
     // 🔼 Move Task Up
@@ -20,7 +30,7 @@ export default class TaskPlugin extends Plugin {
       id: 'move-task-up',
       name: 'Move Task Up',
       hotkeys: [{ modifiers: ['Mod'], key: 'ArrowUp' }],
-      callback: () => manager.moveTask(-1),
+      callback: () => this.manager.moveTask(-1),
     });
 
     // 🔽 Move Task Down
@@ -28,35 +38,38 @@ export default class TaskPlugin extends Plugin {
       id: 'move-task-down',
       name: 'Move Task Down',
       hotkeys: [{ modifiers: ['Mod'], key: 'ArrowDown' }],
-      callback: () => manager.moveTask(1),
+      callback: () => this.manager.moveTask(1),
     });
 
     // 🕒 Reschedule Task
     this.addCommand({
       id: 'reschedule-task',
       name: 'Reschedule Task',
-      hotkeys: [{ modifiers: ['Mod'], key: 'R' }],
-      callback: () => manager.rescheduleTask(),
+      hotkeys: [{ modifiers: ['Mod'], key: 'r' }],
+      callback: () => this.manager.rescheduleTask(),
     });
 
-    // ⚡ Change Priority
+    // ⚡ Toggle Priority
     this.addCommand({
       id: 'toggle-priority',
       name: 'Toggle Task Priority',
-      hotkeys: [{ modifiers: ['Mod'], key: 'P' }],
-      callback: () => manager.togglePriority(),
+      hotkeys: [{ modifiers: ['Mod'], key: 'p' }],
+      callback: () => this.manager.togglePriority(),
     });
+  }
 
-    // 📚 Sidebar View
-    this.registerView('taskmaster-sidebar', leaf => new SidebarView(leaf, manager));
-    this.addRibbonIcon('check-circle', 'Open Task Sidebar', () => {
-      const rightLeaf = this.app.workspace.getRightLeaf(false);
-      if (rightLeaf) {
-        rightLeaf.setViewState({
-          type: 'taskmaster-sidebar',
-          active: true
-        });
-      }
-    });
+  async activateView() {
+    const rightLeaf = this.app.workspace.getRightLeaf(false);
+    if (rightLeaf) {
+      await rightLeaf.setViewState({
+        type: 'taskmaster-sidebar',
+        active: true,
+      });
+      this.app.workspace.revealLeaf(rightLeaf);
+    }
+  }
+
+  onunload() {
+    this.app.workspace.detachLeavesOfType('taskmaster-sidebar');
   }
 }
