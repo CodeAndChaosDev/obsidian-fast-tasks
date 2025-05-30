@@ -132,7 +132,7 @@ Use the following hotkeys inside the note with the task selected:
 | Open Task Modal     | `Ctrl + T`   |
 | Move Up             | `Ctrl + ↑`   |
 | Move Down           | `Ctrl + ↓`   |
-| Change Priority     | `Ctrl + P`   |
+| Change Priority     | `Alt  + Q`   |
 | Reschedule Time     | `Ctrl + R`   |
 | Toggle Sidebar      | Ribbon icon  |
 
