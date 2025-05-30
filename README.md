@@ -18,25 +18,6 @@ A fast and minimal task management plugin for [Obsidian](https://obsidian.md), b
 
 ---
 
-## 📁 Folder Structure
-
-obsidian-taskmaster-plugin/
-│
-├── src/
-│   ├── main.ts             # Plugin entry point
-│   ├── TaskModal.ts        # Task creation modal
-│   ├── TaskManager.ts      # Task logic & operations
-│   ├── SidebarView\.ts      # Sidebar panel with filters
-│   └── types.ts            # Task types/interfaces
-│
-├── manifest.json           # Obsidian plugin manifest
-├── tsconfig.json           # TypeScript configuration
-├── styles.css              # (Optional) custom styles
-├── README.md               # Plugin overview
-├── manual.md               # Feature usage & guide
-└── patch-notes V0.1-alpha.md
-
----
 
 ## ⚙️ Installation
 
