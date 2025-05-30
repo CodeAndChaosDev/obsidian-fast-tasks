@@ -20,7 +20,6 @@ A fast and minimal task management plugin for [Obsidian](https://obsidian.md), b
 
 ## 📁 Folder Structure
 
-
 obsidian-taskmaster-plugin/
 │
 ├── src/
@@ -36,7 +35,6 @@ obsidian-taskmaster-plugin/
 ├── README.md               # Plugin overview
 ├── manual.md               # Feature usage & guide
 └── patch-notes V0.1-alpha.md
-
 
 ---
 
