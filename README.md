@@ -44,7 +44,7 @@ npm run build
 | Create Task Modal | `Ctrl + T`    |
 | Move Task Up      | `Ctrl + ↑`    |
 | Move Task Down    | `Ctrl + ↓`    |
-| Toggle Priority   | `Ctrl + P`    |
+| Toggle Priority   | `ALT  + Q`    |
 | Reschedule Task   | `Ctrl + R`    |
 | Open Task Sidebar | Ribbon Button |
 
@@ -107,7 +107,7 @@ Use the following hotkeys inside the note with the task selected:
 ### 3️⃣ Toggling Priorities
 
 - Select a task in the editor
-- Press `Ctrl + P` to cycle through 🔥 → ⚠ → 💤 → 🔥
+- Press `ALT + Q` to cycle through 🔥 → ⚠ → 💤 → 🔥
 
 ---
 
