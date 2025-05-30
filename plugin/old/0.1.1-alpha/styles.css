@@ -4,7 +4,7 @@
 }
 
 .markdown-preview-view .task-list-item:has(strong) {
-  background-color: white;
+  background-color: #1e1e1e;
   border-left: 4px solid red;
   padding: 4px;
   margin: 4px 0;
