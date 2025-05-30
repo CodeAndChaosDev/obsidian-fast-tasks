@@ -15,12 +15,23 @@ export class SidebarView extends ItemView {
   }
 
   async onOpen() {
-    const container = this.containerEl.children[1];
-    container.empty();
-    container.createEl('h3', { text: 'Your Tasks' });
+  const container = this.containerEl.children[1];
+  container.empty();
+  container.createEl('h3', { text: 'Your Tasks' });
 
-    // Later we will load and display tasks with filters
+  const result = await this.manager.getTasksFromActiveFile();
+  if (!result) {
+    container.createEl('p', { text: 'No active file or tasks found.' });
+    return;
   }
+
+  for (const task of result.tasks) {
+    const el = container.createEl('div', {
+      text: `${task.priority} ${task.description} @${task.time ?? ''} (${task.duration ?? ''}) ${task.tags?.join(' ')}`,
+    });
+    el.classList.add('task-sidebar-item');
+  }
+}
 
   async onClose() {
     // Cleanup if needed
