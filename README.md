@@ -153,6 +153,18 @@ Use the following hotkeys inside the note with the task selected:
 - 🛡️ **Safe View Handling**: Avoids duplicate view registration on plugin reloads.
 - ✅ Fixed: `Toggle Priority` now targets the currently selected task line.
 
+## 📌 Current Features (v0.1.4-alpha)
+- 📝 Modal to create tasks with priority, tags, time & duration
+- 🔍 Task sidebar with live updates (WIP)
+- 🔁 Move task up/down
+- 🕒 Reschedule tasks (works in preview & edit mode)
+- ⚡ Toggle task priority
+- 🧠 Smart task formatting with metadata like `@time`, `(duration)`, and `#tags`
+
+## 🛠️ Changelog
+See [`patch-notes/`](./patch-notes) for all updates.
+
+- `0.1.4-alpha`: Live sidebar updates (partial), preview mode rescheduling, improved internal consistency.
 
 ## 💬 Feedback
 
