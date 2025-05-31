@@ -1,8 +1,15 @@
 import { App, ButtonComponent, TextComponent, TFile, Modal, Notice, MarkdownView } from 'obsidian';
 import { TaskData } from './types';
+import { SidebarView } from 'SidebarView';
 
 export class TaskManager {
-  constructor(private app: App) {}
+   constructor(private app: App, private sidebar?: SidebarView) {}
+  setSidebar(sidebar: SidebarView) {
+    this.sidebar = sidebar;
+  }
+  private refreshSidebar() {
+    this.sidebar?.refreshView?.();
+  }
 
   async insertTask(task: TaskData) {
     const file = this.app.workspace.getActiveFile();
@@ -14,6 +21,7 @@ export class TaskManager {
     }\n`;
 
     await this.app.vault.modify(file, content + '\n' + newTask);
+    this.refreshSidebar();
   }
   async getTasksFromActiveFile(): Promise<{ tasks: TaskData[]; lines: string[]; file: TFile } | null> {
     const file = this.app.workspace.getActiveFile();
@@ -71,6 +79,7 @@ export class TaskManager {
 
   // Update cursor to follow the moved task
   editor.setCursor({ line: targetIndex, ch: 0 });
+   this.refreshSidebar(); 
 }
 
    async rescheduleTask() {
@@ -93,6 +102,7 @@ export class TaskManager {
       editor.setLine(cursor, newLine);
       new Notice(`Rescheduled to ${newTime}`);
     });
+    this.refreshSidebar(); 
 
     modal.open();
   }
@@ -121,6 +131,7 @@ async togglePriority() {
   lines[cursorLine] = line.replace(/(🔥 High|⚠ Medium|💤 Low)/, nextPriority);
 
   await this.app.vault.modify(file, lines.join('\n'));
+  this.refreshSidebar(); 
 }
 
 }

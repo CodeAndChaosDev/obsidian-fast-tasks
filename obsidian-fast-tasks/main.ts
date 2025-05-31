@@ -5,16 +5,28 @@ import { SidebarView } from './SidebarView';
 
 export default class TaskPlugin extends Plugin {
   private manager: TaskManager;
+  private sidebar: SidebarView | null = null;
 
   async onload() {
     this.manager = new TaskManager(this.app);
+    const anyApp = this.app as any;
+    if (!anyApp.viewRegistry?.views?.['taskmaster-sidebar']) {
+  this.registerView('taskmaster-sidebar', (leaf) => {
+        const view = new SidebarView(leaf, this.manager);
+        this.sidebar = view;
+        this.manager.setSidebar(view); // <- inject it here
+        return view;
+      });    }
+
 
     // ✅ Register Sidebar View
-    this.registerView('taskmaster-sidebar', (leaf) => new SidebarView(leaf, this.manager));
+   
 
+    
     // ✅ Ribbon Icon to open Sidebar
     this.addRibbonIcon('check-circle', 'Open Task Sidebar', () => {
       this.activateView();
+      
     });
 
     // ✅ Modal: Create New Task
@@ -56,6 +68,8 @@ export default class TaskPlugin extends Plugin {
       hotkeys: [{ modifiers: ['Mod'], key: 'p' }],
       callback: () => this.manager.togglePriority(),
     });
+    
+
   }
 
   async activateView() {
@@ -71,5 +85,12 @@ export default class TaskPlugin extends Plugin {
 
   onunload() {
     this.app.workspace.detachLeavesOfType('taskmaster-sidebar');
+    const anyApp = this.app as any;
+      if (anyApp.viewRegistry?.views?.['taskmaster-sidebar']) {
+        delete anyApp.viewRegistry.views['taskmaster-sidebar'];
+      }
   }
+
+
+  
 }

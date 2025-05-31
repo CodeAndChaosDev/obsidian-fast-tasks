@@ -33,7 +33,22 @@ export class SidebarView extends ItemView {
   }
 }
 
+
+
   async onClose() {
     // Cleanup if needed
   }
+
+  async refreshView() {
+  const container = this.containerEl.children[1];
+  container.empty();
+  container.createEl('h3', { text: 'Your Tasks (Auto-updated)' });
+  const tasks = await this.manager.getTasksFromActiveFile();
+  if (!tasks) return;
+
+  for (const task of tasks.tasks) {
+    container.createEl('div', { text: `${task.priority} ${task.description} @${task.time ?? ''}` });
+  }
+}
+
 }
