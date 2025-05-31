@@ -146,6 +146,14 @@ Use the following hotkeys inside the note with the task selected:
 
 ---
 
+## 🚀 What's New in `0.1.4-alpha`
+
+- 🔄 **Partial Live Sidebar Sync**: Sidebar updates when adding or editing tasks (edit mode only).
+- ⚙️ **Preview Mode Support**: Rescheduling and toggling priority now work in Preview mode.
+- 🛡️ **Safe View Handling**: Avoids duplicate view registration on plugin reloads.
+- ✅ Fixed: `Toggle Priority` now targets the currently selected task line.
+
+
 ## 💬 Feedback
 
 Open issues or suggestions on [GitHub](https://github.com/CodeAndChaosDev).
