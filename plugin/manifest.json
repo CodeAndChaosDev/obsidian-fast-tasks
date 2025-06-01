@@ -1,0 +1,10 @@
+{
+  "id": "fast-tasks",
+  "name": "Fast Tasks",
+  "version": "0.1.4-alpha",
+  "minAppVersion": "0.12.0",
+  "description": "Quickly insert and manage structured tasks with priorities and statuses.",
+  "author": "Bruno Sousa",
+  "authorUrl": "https://github.com/CodeAndChaosDev",
+  "main": "main.js"
+}
