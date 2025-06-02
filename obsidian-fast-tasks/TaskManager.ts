@@ -3,7 +3,10 @@ import { TaskData } from './types';
 import { SidebarView } from 'SidebarView';
 
 export class TaskManager {
-   constructor(private app: App, private sidebar?: SidebarView) {}
+  private listeners: (() => void)[] = [];
+ 
+  constructor(private app: App, private sidebar?: SidebarView) {}
+
   setSidebar(sidebar: SidebarView) {
     this.sidebar = sidebar;
   }
@@ -82,30 +85,39 @@ export class TaskManager {
    this.refreshSidebar(); 
 }
 
-   async rescheduleTask() {
-    const file = this.app.workspace.getActiveFile();
-    if (!file) return;
+async rescheduleTask() {
+  const file = this.app.workspace.getActiveFile();
+  if (!file) return;
 
-    const editor = this.app.workspace.activeEditor?.editor;
-    if (!editor) return;
+  const editor = this.app.workspace.activeEditor?.editor;
+  if (!editor) return;
 
-    const cursor = editor.getCursor().line;
-    const line = editor.getLine(cursor);
+  const cursor = editor.getCursor().line;
+  const line = editor.getLine(cursor);
 
-    if (!line.match(/- \[ \]/)) {
-      new Notice('Not a task line');
-      return;
-    }
-
-    const modal = new TimeInputModal(this.app, async (newTime: string) => {
-      const newLine = line.replace(/@[\d:]+/, `@${newTime}`);
-      editor.setLine(cursor, newLine);
-      new Notice(`Rescheduled to ${newTime}`);
-    });
-    this.refreshSidebar(); 
-
-    modal.open();
+  if (!line.match(/- \[ \]/)) {
+    new Notice('Not a task line');
+    return;
   }
+
+  const modal = new TimeInputModal(this.app, async (newTime: string) => {
+    const newLine = line.match(/@[\d:]+/)
+      ? line.replace(/@[\d:]+/, `@${newTime}`)
+      : line.replace(/(\(.*?\))/, `@${newTime} $1`);
+
+    editor.setLine(cursor, newLine);
+
+    // ✅ Force disk write, then re-read the file to trigger sidebar update
+    await this.app.vault.modify(file, editor.getValue());
+
+    // ✅ Now force sidebar to re-read from the updated file
+    await this.refreshSidebar();
+
+    new Notice(`Rescheduled to ${newTime}`);
+  });
+
+  modal.open();
+}
 
 async togglePriority() {
   const context = await this.getTasksFromActiveFile();
