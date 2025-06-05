@@ -23,7 +23,16 @@ export class TaskManager {
       task.tags?.join(' ') ?? ''
     }\n`;
 
-    await this.app.vault.modify(file, content + '\n' + newTask);
+    const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+    if (!editor) return;
+
+    // Insert task at current cursor line
+    const cursor = editor.getCursor();
+    const before = content.split('\n').slice(0, cursor.line);
+    const after = content.split('\n').slice(cursor.line);
+
+    const newContent = [...before, newTask.trim(), ...after].join('\n');
+    await this.app.vault.modify(file, newContent);
     this.refreshSidebar();
   }
   async getTasksFromActiveFile(): Promise<{ tasks: TaskData[]; lines: string[]; file: TFile } | null> {
