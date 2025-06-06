@@ -12,6 +12,23 @@ export class TaskModal extends Modal {
 
   private inputs: TextComponent[] = [];
 
+  private handlePriorityHotkey = (e: KeyboardEvent) => {
+    const isInsideModal = this.modalEl.contains(document.activeElement);
+    const isPriorityKey = e.ctrlKey && e.key.toLowerCase() === 'p';
+
+    if (isInsideModal && isPriorityKey) {
+      e.preventDefault();
+
+      const priorities: TaskData['priority'][] = ['🔥 High', '⚠ Medium', '💤 Low'];
+      const currentIndex = priorities.indexOf(this.priority);
+      const nextPriority = priorities[(currentIndex + 1) % priorities.length];
+      this.priority = nextPriority;
+
+      const priorityInput = this.inputs.find(input => input.inputEl.disabled);
+      priorityInput?.setValue?.(nextPriority);
+    }
+  };
+
   constructor(app: App, onSubmit: (task: TaskData) => void) {
     super(app);
     this.onSubmit = onSubmit;
@@ -20,41 +37,56 @@ export class TaskModal extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.createEl('h2', { text: 'New Task' });
-    
-    let inputIndex = 0;
+
+    let indexCounter = 0;
 
     // Description
-    const descInput = new Setting(contentEl)
+    new Setting(contentEl)
       .setName('Description')
       .addText((text: TextComponent) => {
+        const i = indexCounter++;
         this.inputs.push(text);
-        text.inputEl.addEventListener('keydown', e => this.handleKey(e, 0));
+        text.inputEl.addEventListener('keydown', e => this.handleKey(e, i));
         text.inputEl.focus();
         text.onChange(value => {
           this.description = value;
         });
       });
 
-    // Priority
-    new Setting(contentEl)
-      .setName('Priority')
-      .addDropdown(dropdown =>
-        dropdown
-          .addOption('🔥 High', '🔥 High')
-          .addOption('⚠ Medium', '⚠ Medium')
-          .addOption('💤 Low', '💤 Low')
-          .setValue(this.priority)
-          .onChange(value => {
-            this.priority = value as TaskData['priority'];
-          }));
+new Setting(contentEl)
+  .setName('Priority')
+  .setDesc('Press Ctrl + P or click to cycle')
+  .addText(text => {
+    const i = indexCounter++;
+    text.setValue(this.priority);
+    text.inputEl.readOnly = true;
+    text.inputEl.style.cursor = 'pointer';
+
+    // Make focusable and navigable
+    this.inputs.push(text);
+    text.inputEl.addEventListener('keydown', e => this.handleKey(e, i));
+
+    // Allow click to cycle as well
+    text.inputEl.addEventListener('click', () => {
+      const priorities: TaskData['priority'][] = ['🔥 High', '⚠ Medium', '💤 Low'];
+      const currentIndex = priorities.indexOf(this.priority);
+      const nextPriority = priorities[(currentIndex + 1) % priorities.length];
+      this.priority = nextPriority;
+      text.setValue(nextPriority);
+    });
+  });
+
+      
+    document.addEventListener('keydown', this.handlePriorityHotkey);
 
     // Time
     new Setting(contentEl)
       .setName('Time (HH:MM)')
       .addText(text => {
+        const i = indexCounter++;
         this.inputs.push(text);
         text.setPlaceholder('2230 → 22:30');
-        text.inputEl.addEventListener('keydown', e => this.handleKey(e, 1));
+        text.inputEl.addEventListener('keydown', e => this.handleKey(e, i));
         text.onChange(value => {
           this.time = this.formatTime(value);
         });
@@ -64,9 +96,10 @@ export class TaskModal extends Modal {
     new Setting(contentEl)
       .setName('Estimated Duration')
       .addText(text => {
+        const i = indexCounter++;
         this.inputs.push(text);
         text.setPlaceholder('20 → 20min');
-        text.inputEl.addEventListener('keydown', e => this.handleKey(e, 2));
+        text.inputEl.addEventListener('keydown', e => this.handleKey(e, i));
         text.onChange(value => {
           this.duration = this.formatDuration(value);
         });
@@ -76,13 +109,14 @@ export class TaskModal extends Modal {
     new Setting(contentEl)
       .setName('Tags (comma-separated)')
       .addText(text => {
+        const i = indexCounter++;
         this.inputs.push(text);
-        text.inputEl.addEventListener('keydown', e => this.handleKey(e, 3));
+        text.inputEl.addEventListener('keydown', e => this.handleKey(e, i));
         text.setPlaceholder('#work, #deep').onChange(value => {
           this.tags = value
             .split(',')
             .map(t => t.trim())
-            .filter(t => t.length > 0);
+            .filter(Boolean);
         });
       });
 
@@ -112,24 +146,24 @@ export class TaskModal extends Modal {
   }
 
   private handleKey(e: KeyboardEvent, index: number) {
-  if (e.key === 'Enter' && index === this.inputs.length - 1) {
-    e.preventDefault();
-    this.submitTask();
-    return;
-  }
+    if (e.key === 'Enter' && index === this.inputs.length - 1) {
+      e.preventDefault();
+      this.submitTask();
+      return;
+    }
 
-  if (e.key === 'Tab' || (e.ctrlKey && e.key === 'ArrowDown')) {
-    e.preventDefault();
-    const next = this.inputs[index + 1];
-    next?.inputEl.focus();
-  }
+    if (e.key === 'Tab' || (e.ctrlKey && e.key === 'ArrowDown')) {
+      e.preventDefault();
+      const next = this.inputs[index + 1];
+      next?.inputEl.focus();
+    }
 
-  if (e.shiftKey && e.key === 'Tab' || (e.ctrlKey && e.key === 'ArrowUp')) {
-    e.preventDefault();
-    const prev = this.inputs[index - 1];
-    prev?.inputEl.focus();
+    if ((e.shiftKey && e.key === 'Tab') || (e.ctrlKey && e.key === 'ArrowUp')) {
+      e.preventDefault();
+      const prev = this.inputs[index - 1];
+      prev?.inputEl.focus();
+    }
   }
-}
 
   private submitTask() {
     if (!this.description.trim()) {
@@ -148,5 +182,6 @@ export class TaskModal extends Modal {
 
   onClose() {
     this.contentEl.empty();
+    document.removeEventListener('keydown', this.handlePriorityHotkey);
   }
 }
