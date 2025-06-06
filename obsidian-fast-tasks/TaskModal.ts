@@ -20,7 +20,7 @@ export class TaskModal extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.createEl('h2', { text: 'New Task' });
-
+    
     let inputIndex = 0;
 
     // Description
@@ -112,15 +112,24 @@ export class TaskModal extends Modal {
   }
 
   private handleKey(e: KeyboardEvent, index: number) {
-    if (e.key === 'Enter' && index === this.inputs.length - 1) {
-      e.preventDefault();
-      this.submitTask();
-    } else if (e.key === 'Tab' || (e.ctrlKey && e.key === 'ArrowDown')) {
-      e.preventDefault();
-      const next = this.inputs[index + 1];
-      next?.inputEl.focus();
-    }
+  if (e.key === 'Enter' && index === this.inputs.length - 1) {
+    e.preventDefault();
+    this.submitTask();
+    return;
   }
+
+  if (e.key === 'Tab' || (e.ctrlKey && e.key === 'ArrowDown')) {
+    e.preventDefault();
+    const next = this.inputs[index + 1];
+    next?.inputEl.focus();
+  }
+
+  if (e.shiftKey && e.key === 'Tab' || (e.ctrlKey && e.key === 'ArrowUp')) {
+    e.preventDefault();
+    const prev = this.inputs[index - 1];
+    prev?.inputEl.focus();
+  }
+}
 
   private submitTask() {
     if (!this.description.trim()) {
