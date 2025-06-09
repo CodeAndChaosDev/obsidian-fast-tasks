@@ -36,33 +36,34 @@ export class TaskManager {
     this.refreshSidebar();
   }
   async getTasksFromActiveFile(): Promise<{ tasks: TaskData[]; lines: string[]; file: TFile } | null> {
-    const file = this.app.workspace.getActiveFile();
-    if (!file) return null;
+  const file = this.app.workspace.getActiveFile();
+  if (!file) return null;
 
-    const content = await this.app.vault.read(file);
-    const lines = content.split('\n');
+  const content = await this.app.vault.read(file);
+  const lines = content.split('\n');
+  const tasks: TaskData[] = [];
 
-    const tasks: TaskData[] = [];
+  lines.forEach((line, index) => {
+    if (line.trim().startsWith('- [ ]')) {
+      const match = line.match(/- \[ \] (🔥 High|⚠ Medium|💤 Low)?\s?(.*?)\s?@(\d{1,2}:\d{2})?\s?\((.*?)\)?\s?(.*)?/);
+      if (match) {
+        const [, priority, description, time, duration, trailing] = match;
+        const tagMatches = trailing?.match(/#[\w\d_-]+/g) ?? [];
 
-    lines.forEach((line, index) => {
-      if (line.trim().startsWith('- [ ]')) {
-        const match = line.match(/- \[ \] (🔥 High|⚠ Medium|💤 Low)?\s?(.*?)\s?@(\d{1,2}:\d{2})?\s?\((.*?)\)?\s?(.*)?/);
-        if (match) {
-          const [, priority, description, time, duration, tags] = match;
-          tasks.push({
-            priority: (priority as TaskData['priority']) ?? '⚠ Medium',
-            description: description.trim(),
-            time: time ?? '',
-            duration: duration ?? '',
-            tags: tags ? tags.split(' ').filter(Boolean) : [],
-            lineNumber: index,
-          });
-        }
+        tasks.push({
+          priority: (priority as TaskData['priority']) ?? '⚠ Medium',
+          description: description.trim(),
+          time: time ?? '',
+          duration: duration ?? '',
+          tags: tagMatches.map(tag => tag.trim()),
+          lineNumber: index,
+        });
       }
-    });
+    }
+  });
 
-    return { tasks, lines, file };
-  }
+  return { tasks, lines, file };
+}
 
 
   async moveTask(direction: number) {
